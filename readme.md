@@ -2,7 +2,7 @@
 ReCom is a simple community micro forum and message board. You can add new topics and reply to them. Perfect for starting a small online community.
 
 ##Screenshots
-[ReCom Screenshot](http://h4z.it/Image/898116_recomScreen2.PNG "Recome Screenshot")
+![ReCom Screenshot](http://h4z.it/Image/898116_recomScreen2.PNG "Recome Screenshot")
 
 ##Requirements
 Before you get started, ensure you have the following:

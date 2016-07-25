@@ -1,0 +1,23 @@
+<navbar></navbar>
+<!-- Normal Layout -->
+<div class="container-med" layout="column" flex="100" layout-align="center" layout-padding>
+  <div layout="row">
+    <md-input-container md-no-float class="md-block" flex="100">
+      <md-icon class="material-icons">search</md-icon>
+      <label>Search...</label>
+      <input ng-model="searchData.searchContent" type="text" ng-change="doSearch()">
+    </md-input-container>
+  </div>
+  <div layout="column" layout-margin>
+    <md-content layout="row" layout-align="space-between center" class="topicList" ng-repeat="topic in topics.data" ng-class="$even ? 'topicList-Light' : ''" md-ink-ripple="true">
+      <p class="topicTitle" flex ui-sref="main.details({topicSlug:topic.topicSlug, topicID:topic.id})"> {{topic.topicTitle}}</p>
+      <div layout="row">
+        <md-content class="topicCategory" ui-sref="main.channel({ channelSlug: topic.channelSlug })">{{topic.channelTitle}}</md-content>
+      </div>
+      <p class="timeStamp">{{topic.topicViews}}/{{topic.topicReplies}}</p>
+      <p class="timeStamp">{{topic.updated_at | amCalendar}}</p>
+      <img ng-src="{{topic.avatar}}" ng-click="showProfile($event, topic.name)"/>
+    </md-content>
+  </div>
+</div>
+<!-- End Layout -->

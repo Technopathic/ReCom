@@ -1,0 +1,65 @@
+<navbar></navbar>
+
+<div class="custom-container">
+  <div layout="row">
+    <md-button ng-if="authenticated == true && currentUser.role == 1" ng-click="makeChannel()"><md-icon class="material-icons">add</md-icon> New Channel</md-button>
+  </div>
+</div>
+<div class="custom-container" layout="row" layout-sm="column" layout-xs="column" layout-wrap layout-padding>
+  <div layout="column" flex="100" flex-gt-sm="25" ng-repeat="channel in channels">
+    <div class="post-box" ng-style="{'background-image':'url({{channel.channelImg}})'}"  ui-sref="main.channel({ channelSlug: channel.channelSlug })" layout="column">
+      <span flex></span>
+      <div class="post-details" layout="row" layout-align="start end">
+        <h3>{{channel.channelTitle}}</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/ng-template" id="makeChannel.html">
+  <md-bottom-sheet class="dashSheetContainer">
+    <md-toolbar class="md-primary md-hue-1 footerMenu" hide-gt-md>
+      <div class="md-toolbar-tools">
+        <md-button class="md-icon-button" aria-label="leftPane" ng-click="openLeftMenu()">
+          <md-icon class="materials-icon">keyboard_arrow_left</md-icon>
+        </md-button>
+        <span flex></span>
+        <md-button ng-click="closeSheet()" class="md-icon-button" md-ink-ripple="false"><md-icon class="materials-icon">close</md-icon></md-button>
+        <md-button ng-click="doChannel()" class="md-icon-button"  md-ink-ripple="false"><md-icon class="material-icons">check</md-icon></md-button>
+        <span flex></span>
+      </div>
+    </md-toolbar>
+    <md-sidenav class="md-sidenav-left md-whiteframe-4dp" md-component-id="left">
+      <div layout="column" layout-padding>
+        <h2 class="content-h2">Channel Image</h2>
+        <md-divider></md-divider>
+        <input ngf-select="" class="ng-hide" ng-model="channelData.channelImg" id="makeChannelImg" ngf-accept="'image/*'" type="file" ngf-max-size="10MB"/>
+        <label for="makeChannelImg" class="md-button"><md-icon class="material-icons">add_a_photo</md-icon></label>
+        <img class="preview-image" ngf-src="channelData.channelImg" />
+      </div>
+    </md-sidenav>
+    <form layout="row" layout-align="center none" layout-padding>
+      <div layout="column" flex="50" flex-gt-md="20" hide-sm hide-xs>
+        <h2 class="content-h2">Channel Image</h2>
+        <md-divider></md-divider>
+        <input ngf-select="" class="ng-hide" ng-model="channelData.channelImg" id="makeChannelImg" ngf-accept="'image/*'" type="file" ngf-max-size="10MB"/>
+        <label for="makeChannelImg" class="md-button"><md-icon class="material-icons">add_a_photo</md-icon></label>
+        <img class="preview-image" ngf-src="channelData.channelImg" />
+      </div>
+      <div layout="column" flex="100" flex-gt-sm="30">
+        <h2 class="content-h2">Channel Info</h2>
+        <md-divider></md-divider>
+        <md-input-container class="md-block">
+          <label>Channel Title</label>
+          <input ng-model="channelData.channelTitle">
+        </md-input-container>
+        <md-input-container class="md-block">
+          <label>Channel Description</label>
+          <input ng-model="channelData.channelDesc">
+        </md-input-container>
+        <md-button ng-click="doChannel()" hide-sm hide-xs><md-icon class="material-icons" >check</md-icon> Create Channel</md-button>
+        <md-button ng-click="closeSheet()" hide-sm hide-xs><md-icon class="material-icons">close</md-icon> Close</md-button>
+      </div>
+    </form>
+  </md-bottom-sheet>
+</script>

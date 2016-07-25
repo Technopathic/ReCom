@@ -1,0 +1,152 @@
+<navbar></navbar>
+
+<div class="container-max topicContainer">
+  <div class="container" layout="row">
+    <div layout="column" layout-align="start center" class="avatarContainer" layout-margin>
+      <img ng-click="showProfile($event, author.name)" ng-src="{{author.avatar}}" class="avatarImg"/>
+      <span ng-click="showProfile($event, author.name)" class="authorName">{{author.displayName}}</span>
+    </div>
+    <div layout="column" class="textContainer" layout-margin>
+      <div class="topicBody" markdown-to-html="topic.topicBody"></div>
+      <div class="topicStats" layout="row">
+        <div class="topicCategory" layout="row">
+          {{topic.topicViews}} Views
+          &nbsp;<md-divider></md-divider>&nbsp;
+          {{topic.topicReplies}} Replies
+        </div>
+        <md-content class="topicCategory" ui-sref="main.channel({ channelSlug: topic.channelSlug })">{{topic.channelTitle}}</md-content>
+        <md-content ng-if="authenticated == true" class="replyButton" md-ink-ripple="true" ng-click="makeReply(0)"><md-icon class="material-icons md-18 md-light">chat_bubble</md-icon> Reply</md-content>
+        <md-content ng-if="authenticated != true" class="replyButton" md-ink-ripple="true" ng-click="authDialog($event)"><md-icon class="material-icons md-18 md-light">chat_bubble</md-icon> Reply</md-content>
+        <md-content ng-if="authenticated == true && currentUser.role == 1 || currentUser.id == topic.topicAuthor" ng-if="authenticated == true" class="replyButton" md-ink-ripple="true" ng-click="editTopic(topic.id)"><md-icon class="material-icons md-18 md-light">edit</md-icon> Edit</md-content>
+        <md-content ng-if="authenticated == true && currentUser.role == 1" ng-if="authenticated == true" class="replyButton" md-ink-ripple="true" ng-click="setFeature(topic.id)"><md-icon class="material-icons md-18 md-light">star</md-icon> Feature</md-content>
+        <md-content ng-if="authenticated == true && currentUser.role == 1 || currentUser.id == topic.topicAuthor" ng-if="authenticated == true" class="replyButton" md-ink-ripple="true" ng-click="deleteTopic(topic.id)"><md-icon class="material-icons md-18 md-light">delete</md-icon> Delete</md-content>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-max repliesContainer">
+  <div class="replyContainer" ng-repeat="reply in replies.data track by $index" id="{{reply.id}}" ng-class="replyHash == reply.id ? 'activeReply' : ''">
+    <div class="container-med" layout="column">
+      <div layout="row" class="parentReply">
+        <img ng-src="{{reply.avatar}}" class="replyAvatar" ng-click="showProfile($event, reply.name)"/>
+        <div layout="column">
+          <div class="replyInfo" layout="row">
+            <span ng-click="showProfile($event, reply.name)">{{reply.displayName}}</span>
+            <span class="timeStamp">{{reply.created_at | amCalendar}}</span>
+          </div>
+          <div class="replyBody" markdown-to-html="reply.replyBody"></div>
+          <div class="replyStats" layout="row">
+            <md-content ng-if="authenticated == true" class="replyButton" md-ink-ripple="true" ng-click="makeReply(reply.id)"><md-icon class="material-icons md-18 md-light">chat_bubble</md-icon> Reply</md-content>
+            <md-content ng-if="authenticated != true" class="replyButton" md-ink-ripple="true" ng-click="authDialog($event)"><md-icon class="material-icons md-18 md-light">chat_bubble</md-icon> Reply</md-content>
+            <md-content ng-if="authenticated == true && currentUser.role == 1 || currentUser.id == reply.replyAuthor" class="replyButton" md-ink-ripple="true" ng-click="editReply(reply, $index, 'reply')"><md-icon class="material-icons md-18 md-light">edit</md-icon> Edit</md-content>
+            <md-content ng-if="authenticated == true && currentUser.role == 1 || currentUser.id == reply.replyAuthor" class="replyButton" md-ink-ripple="true" ng-click="deleteReply(reply.id, $index, 'reply')"><md-icon class="material-icons md-18 md-light">delete</md-icon> Delete</md-content>
+          </div>
+        </div>
+      </div>
+      <div class="childContainer" ng-repeat="childReply in reply.childReplies" id="{{childReply.id}}" ng-class="replyHash == childReply.id ? 'activeReply' : ''" layout="column" layout-align="center start" flex="100">
+        <div layout="row">
+          <img ng-src="{{childReply.avatar}}" ng-click="showProfile($event, childReply.name)" class="replyAvatar"/>
+          <div layout="column">
+            <div class="replyInfo" layout="row">
+              <span ng-click="showProfile($event, childReply.name)">{{childReply.displayName}}</span>
+              <span class="timeStamp">{{childReply.created_at | amCalendar}}</span>
+            </div>
+            <div class="replyBody" markdown-to-html="childReply.replyBody"></div>
+            <div class="replyStats" layout="row">
+              <md-content ng-if="authenticated == true && currentUser.role == 1 || currentUser.id == childReply.replyAuthor" class="replyButton" md-ink-ripple="true" ng-click="editReply(childReply, $index, 'childReply')"><md-icon class="material-icons md-18 md-light">edit</md-icon> Edit</md-content>
+              <md-content ng-if="authenticated == true && currentUser.role == 1 || currentUser.id == childReply.replyAuthor" ng-if="authenticated == true" class="replyButton" md-ink-ripple="true" ng-click="deleteReply(childReply.id, $index, 'childReply')"><md-icon class="material-icons md-18 md-light">delete</md-icon> Delete</md-content>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <md-button ng-if="replies.current_page < replies.last_page" ng-click="getReplies(0, 10, replies.current_page + 1)">More</md-button>
+</div>
+
+<script type="text/ng-template" id="editTopic.html">
+  <md-bottom-sheet class="dashSheetContainer" ng-class="displayFull == true ? 'dashSheetFull' : ''">
+    <md-toolbar class="md-primary md-hue-1 footerMenu" hide-gt-md>
+      <div class="md-toolbar-tools">
+        <md-button class="md-icon-button" aria-label="leftPane" ng-click="openLeftMenu()">
+          <md-icon class="materials-icon">keyboard_arrow_left</md-icon>
+        </md-button>
+        <span flex></span>
+        <md-button ng-click="closeSheet()" class="md-icon-button" md-ink-ripple="false"><md-icon class="materials-icon">close</md-icon></md-button>
+        <md-button ng-click="updateTopic(topic.id)" class="md-icon-button" md-ink-ripple="false"><md-icon class="materials-icon">check</md-icon></md-button>
+        <span flex></span>
+        <md-button class="md-icon-button" aria-label="rightPane" ng-click="openRightMenu()">
+          <md-icon class="materials-icon">keyboard_arrow_right</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <md-sidenav class="md-sidenav-left md-whiteframe-4dp" md-component-id="left">
+      <div layout="column" layout-padding>
+        <h2 class="content-h2">Topic Info</h2>
+        <md-divider></md-divider>
+        <md-input-container class="md-block">
+          <label>Topic Title</label>
+          <input ng-model="topicData.topicTitle">
+        </md-input-container>
+        <md-input-container>
+          <label>Channel</label>
+          <md-select ng-model="topicData.topicChannel">
+            <md-option ng-repeat="channelName in channelList" value="{{channelName.id}}">
+              {{channelName.channelTitle}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+      </div>
+    </md-sidenav>
+    <form layout="row" layout-sm="column" layout-padding>
+      <div layout="column" flex="20" hide-xs hide-sm ng-hide="displayFull">
+        <h2 class="content-h2">Topic Info</h2>
+        <md-divider></md-divider>
+        <md-input-container class="md-block">
+          <label>Topic Title</label>
+          <input ng-model="topicData.topicTitle">
+        </md-input-container>
+        <md-input-container>
+          <label>Channel</label>
+          <md-select ng-model="topicData.topicChannel">
+            <md-option ng-repeat="channelName in channelList" value="{{channelName.id}}">
+              {{channelName.channelTitle}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+        <md-button ng-click="updateTopic(topic.id)"><md-icon class="material-icons">check</md-icon> Update Topic</md-button>
+        <md-button ng-click="closeSheet()"><md-icon class="material-icons">close</md-icon> Close</md-button>
+      </div>
+      <md-divider hide-xs hide-sm ng-hide="displayFull"></md-divider>
+      <div layout="column" flex="100" flex-gt-md="80" ng-if="!displayFull">
+        <textarea ng-model="topicData.topicBody" placeholder="" autofocus="true"></textarea>
+      </div>
+      <div layout="row" flex="100" ng-if="displayFull">
+        <div layout="column" flex="50">
+          <textarea ng-model="topicData.topicBody" placeholder="" autofocus="true"></textarea>
+        </div>
+        <div ng-if="topicData.topicBody" class="topicPreview detail-body" markdown-to-html="topicData.topicBody" layout-padding flex="50"></div>
+      </div>
+      <div class="dashSheetOptions" hide-sm hide-xs hide-sm layout="row">
+        <md-button ng-if="displayFull == true" ng-click="closeSheet()" class="md-icon-button" md-ink-ripple="false" show-sm><md-icon class="materials-icon">close</md-icon></md-button>
+        <md-button ng-click="fullSheet()" class="md-icon-button" md-ink-ripple="false" hide-sm><md-icon class="materials-icon">fullscreen</md-icon></md-button>
+        <md-button ng-if="displayFull == true" ng-click="updateTopic(topic.id)" class="md-icon-button" md-ink-ripple="false" show-sm><md-icon class="materials-icon">check</md-icon></md-button>
+      </div>
+    </form>
+  </md-bottom-sheet>
+</script>
+
+<script type="text/ng-template" id="editReply.html">
+  <md-bottom-sheet layout="row" class="dashSheetContainer" ng-class="displayFull == true ? 'dashSheetFull' : ''">
+      <form layout="column" flex="50" flex-sm="100" layout-padding>
+        <textarea ng-model="replyData.replyBody" placeholder="" autofocus="true"></textarea>
+      </form>
+      <div class="replyPreview" ng-if="replyData.replyBody" markdown-to-html="replyData.replyBody" flex="50" layout-padding hide-sm hide-xs></div>
+      <div class="sheetOptions" layout="row">
+        <md-button ng-click="closeSheet()" class="md-icon-button" md-ink-ripple="false"><md-icon class="materials-icon">close</md-icon></md-button>
+        <md-button ng-click="fullSheet()" class="md-icon-button" md-ink-ripple="false" hide-sm><md-icon class="materials-icon">fullscreen</md-icon></md-button>
+        <md-button ng-click="updateReply(replyData.replyID)" class="md-icon-button" md-ink-ripple="false"><md-icon class="materials-icon">check</md-icon></md-button>
+      </div>
+  </md-bottom-sheet>
+</script>

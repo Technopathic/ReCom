@@ -1,0 +1,103 @@
+<navbar></navbar>
+<!-- Normal Layout -->
+<div class="container-med" layout="column" flex="100" layout-align="center">
+  <div layout="row">
+    <md-button ng-if="authenticated == true" ng-click="makeContent()"><md-icon class="material-icons">add</md-icon> New Topic</md-button>
+    <md-button ng-if="authenticated != true" ng-click="authDialog()"><md-icon class="material-icons">add</md-icon> New Topic</md-button>
+  </div>
+  <div layout="column" layout-margin>
+    <md-content layout="row" layout-align="space-between center" class="topicList" ng-repeat="topic in featured" ng-class="$even ? 'topicList-Light' : ''" md-ink-ripple="true">
+      <md-icon class="topicIcon" class="material-icons">star</md-icon>
+      <p class="topicTitle" flex ui-sref="main.details({topicSlug:topic.topicSlug, topicID:topic.id})"> {{topic.topicTitle}}</p>
+      <div layout="row">
+        <md-content class="topicCategory" ui-sref="main.channel({ channelSlug: topic.channelSlug })">{{topic.channelTitle}}</md-content>
+      </div>
+      <p class="timeStamp">{{topic.topicViews}}/{{topic.topicReplies}}</p>
+      <p class="timeStamp">{{topic.updated_at | amCalendar}}</p>
+      <img ng-src="{{topic.avatar}}" ng-click="showProfile($event, topic.name)"/>
+    </md-content>
+    <md-content layout="row" layout-align="space-between center" class="topicList" ng-repeat="topic in topics.data" ng-class="$even ? 'topicList-Light' : ''" md-ink-ripple="true">
+      <p class="topicTitle" flex ui-sref="main.details({topicSlug:topic.topicSlug, topicID:topic.id})"> {{topic.topicTitle}}</p>
+      <div layout="row">
+        <md-content class="topicCategory" ui-sref="main.channel({ channelSlug: topic.channelSlug })">{{topic.channelTitle}}</md-content>
+      </div>
+      <p class="timeStamp">{{topic.topicViews}}/{{topic.topicReplies}}</p>
+      <p class="timeStamp">{{topic.updated_at | amCalendar}}</p>
+      <img ng-src="{{topic.avatar}}" ng-click="showProfile($event, topic.name)"/>
+    </md-content>
+  </div>
+  <md-button ng-if="topics.current_page < topics.last_page" ng-click="getTopics(0, 10, topics.current_page + 1)">More</md-button>
+</div>
+<!-- End Layout -->
+
+<script type="text/ng-template" id="makeTopic.html">
+  <md-bottom-sheet class="dashSheetContainer" ng-class="displayFull == true ? 'dashSheetFull' : ''">
+    <md-toolbar class="md-primary md-hue-1 footerMenu" hide-gt-md>
+      <div class="md-toolbar-tools">
+        <md-button class="md-icon-button" aria-label="leftPane" ng-click="openLeftMenu()">
+          <md-icon class="materials-icon">keyboard_arrow_left</md-icon>
+        </md-button>
+        <span flex></span>
+        <md-button ng-click="closeSheet()" class="md-icon-button" md-ink-ripple="false"><md-icon class="materials-icon">close</md-icon></md-button>
+        <md-button ng-click="doTopic('Published')" class="md-icon-button" md-ink-ripple="false"><md-icon class="materials-icon">check</md-icon></md-button>
+        <span flex></span>
+        <md-button class="md-icon-button" aria-label="rightPane" ng-click="openRightMenu()">
+          <md-icon class="materials-icon">keyboard_arrow_right</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <md-sidenav class="md-sidenav-left md-whiteframe-4dp" md-component-id="left">
+      <div layout="column" layout-padding>
+        <h2 class="content-h2">Topic Info</h2>
+        <md-divider></md-divider>
+        <md-input-container class="md-block">
+          <label>Topic Title</label>
+          <input ng-model="topicData.topicTitle">
+        </md-input-container>
+        <md-input-container>
+          <label>Channel</label>
+          <md-select ng-model="topicData.topicChannel">
+            <md-option ng-repeat="channelName in channelList" value="{{channelName.id}}">
+              {{channelName.channelTitle}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+      </div>
+    </md-sidenav>
+    <form layout="row" layout-sm="column" layout-padding>
+      <div layout="column" flex="20" hide-xs hide-sm ng-hide="displayFull">
+        <h2 class="content-h2">Topic Info</h2>
+        <md-divider></md-divider>
+        <md-input-container class="md-block">
+          <label>Topic Title</label>
+          <input ng-model="topicData.topicTitle">
+        </md-input-container>
+        <md-input-container>
+          <label>Channel</label>
+          <md-select ng-model="topicData.topicChannel">
+            <md-option ng-repeat="channelName in channelList" value="{{channelName.id}}">
+              {{channelName.channelTitle}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+        <md-button ng-click="doTopic('Published')"><md-icon class="material-icons">check</md-icon> Publish Topic</md-button>
+        <md-button ng-click="closeSheet()"><md-icon class="material-icons">close</md-icon> Close</md-button>
+      </div>
+      <md-divider hide-xs hide-sm ng-hide="displayFull"></md-divider>
+      <div layout="column" flex="100" flex-gt-md="80" ng-if="!displayFull">
+        <textarea ng-model="topicData.topicBody" placeholder="" autofocus="true"></textarea>
+      </div>
+      <div layout="row" flex="100" ng-if="displayFull">
+        <div layout="column" flex="50">
+          <textarea ng-model="topicData.topicBody" placeholder="" autofocus="true"></textarea>
+        </div>
+        <div ng-if="topicData.topicBody" class="topicPreview detail-body" markdown-to-html="topicData.topicBody" layout-padding flex="50"></div>
+      </div>
+      <div class="dashSheetOptions" hide-sm hide-xs hide-sm layout="row">
+        <md-button ng-if="displayFull == true" ng-click="closeSheet()" class="md-icon-button" md-ink-ripple="false" show-sm><md-icon class="materials-icon">close</md-icon></md-button>
+        <md-button ng-click="fullSheet()" class="md-icon-button" md-ink-ripple="false" hide-sm><md-icon class="materials-icon">fullscreen</md-icon></md-button>
+        <md-button ng-if="displayFull == true" ng-click="doTopic('Published')" class="md-icon-button" md-ink-ripple="false" show-sm><md-icon class="materials-icon">check</md-icon></md-button>
+      </div>
+    </form>
+  </md-bottom-sheet>
+</script>

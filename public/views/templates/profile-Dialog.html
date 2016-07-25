@@ -1,0 +1,20 @@
+<md-dialog aria-label="Profile" ng-cloak>
+  <div layout="column" layout-padding>
+    <md-dialog-content>
+      <div layout="column" layout-align="center center">
+        <img src="{{user.avatar}}"/>
+        <h3>{{user.displayName}}</h3>
+        <pre>@{{user.name}}</pre>
+        <p>{{user.profileTitle}}<p>
+        <p class="replyButton container-max">{{user.roleName}}</p>
+        <p class="replyButton container-max">Joined: {{user.created_at | amCalendar}}</p>
+        <p class="replyButton container-max">Topics: {{user.topics}}</p>
+        <p class="replyButton container-max">Replies: {{user.replies}}</p>
+        <md-button ng-if="authenticated == true && currentUser.role == 1" ng-click="editProfile($event, user.id)" flex><md-icon class="material-icons">edit</md-icon> Edit</md-button>
+        <md-button ng-if="authenticated == true && currentUser.role == 1" ng-click="setRole($event, user.id)" flex><md-icon class="material-icons">person_pin</md-icon> Set Role</md-button>
+        <md-button ng-if="authenticated == true && currentUser.role == 1" ng-click="banUser(user.id)" flex><md-icon class="material-icons">do_not_disturb</md-icon> Ban</md-button>
+        <md-button ng-if="authenticated == true && currentUser.role == 1" ng-click="deleteUser(user.id)" flex><md-icon class="material-icons">delete</md-icon> Delete</md-button>
+      </div>
+    </md-dialog-content>
+  </div>
+</md-dialog>
